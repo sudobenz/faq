@@ -1,4 +1,15 @@
 # FAQ Portal — version 0.8.4
+<!-- License badge: place this near the top of the README -->
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+
+<!-- License section: place this near the end of the README -->
+## License
+
+FAQ Portal is licensed under the [Apache License, Version 2.0](LICENSE).
+
+Copyright © 2026 sudobenz.
+
+Unless otherwise stated, this license applies to the original project files authored for this repository. Third-party components and assets remain subject to their respective licenses and notices.
 
 **Version actuelle : 0.8.4 — API de recherche sécurisée pour l’intégration GLPI 11.0.11+.**
 
