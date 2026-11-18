@@ -1,0 +1,157 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Personnalisation complète — Administration{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/css/portal-editor.css">{% endblock %}
+{% block admin_content %}
+<div class="admin-page-head"><div><span class="eyebrow">ÉDITEUR DU PORTAIL</span><h1>Personnalisation complète</h1><p>Modifiez les textes, menus, couleurs, blocs de la page d'accueil et éléments des fiches sans modifier le code.</p></div><a class="button button-light" href="/" target="_blank">Aperçu du portail ↗</a></div>
+<form method="post" action="/admin/portal" class="portal-editor-form" id="portal-editor-form">
+  <nav class="portal-editor-tabs" aria-label="Rubriques de personnalisation">
+    <button type="button" class="is-active" data-portal-tab="0"><span>01</span> Identité</button>
+    <button type="button" data-portal-tab="1"><span>02</span> Accueil</button>
+    <button type="button" data-portal-tab="2"><span>03</span> Contenus</button>
+    <button type="button" data-portal-tab="3"><span>04</span> Apparence</button>
+    <button type="button" data-portal-tab="4"><span>05</span> Affichage</button>
+    <button type="button" data-portal-tab="5"><span>06</span> Pied de page</button>
+  </nav>
+  <div class="portal-editor-workspace">
+  <input type="hidden" name="csrf" value="{{ csrf_token }}">
+  <details class="admin-panel editor-section" open><summary><span>01</span><div><b>Identité et en-tête</b><small>Nom, logo, accroche, recherche et navigation principale</small></div></summary>
+    <div class="editor-section-body">
+      <div class="field-grid two"><div><label>Nom du portail</label><input name="brand_name" required maxlength="100" value="{{ settings.brand_name }}"></div><div><label>Sous-titre sous le logo</label><input name="header_subtitle" maxlength="100" value="{{ settings.header_subtitle }}"></div>
+      <div><label>Accroche (branding)</label><input name="brand_tagline" maxlength="200" value="{{ settings.brand_tagline }}"></div><div><label>URL du logo</label><div class="inline-upload-field"><input name="brand_logo_url" id="brand_logo_url" value="{{ settings.brand_logo_url }}" placeholder="/static/uploads/logo.png"><input type="file" id="brand_logo_file" accept="image/png,image/jpeg,image/webp,image/gif" aria-label="Importer un logo"></div><small class="field-help">Importez un logo avec le champ fichier. Le chemin sera renseigné automatiquement.</small></div>
+      <div><label>Texte indicatif de la recherche</label><input name="search_placeholder" maxlength="180" value="{{ settings.search_placeholder }}"></div><div><label>Texte du bouton rechercher</label><input name="search_button_label" value="{{ settings.search_button_label }}"></div>
+      <div><label>Bouton connexion OIDC</label><input name="oidc_button_label" value="{{ settings.oidc_button_label }}"></div><div><label>Bouton connexion locale</label><input name="local_button_label" value="{{ settings.local_button_label }}"></div>
+      <div><label>Bouton déconnexion</label><input name="logout_button_label" value="{{ settings.logout_button_label }}"></div><div><label>Lien espace « Mes fiches »</label><input name="my_follows_nav_label" value="{{ settings.my_follows_nav_label }}"></div>
+      <div><label>Lien espace « Mes questions »</label><input name="my_questions_nav_label" value="{{ settings.my_questions_nav_label }}"></div>
+      <div class="field-full"><label>Liens de navigation — un par ligne</label><textarea name="nav_items_text" rows="5" spellcheck="false">{{ nav_text }}</textarea><small class="field-help">Format : <code>Libellé | URL</code>. URL interne commençant par / ou adresse HTTPS. Exemple : Centre RH | /?category=Ressources%20humaines. Maximum 12 liens.</small></div></div>
+  </details>
+  <details class="admin-panel editor-section" open><summary><span>02</span><div><b>Page d'accueil</b><small>Textes du bandeau, de la mise en avant, du catalogue et des accès rapides</small></div></summary>
+    <div class="editor-section-body"><div class="field-grid two">
+      <div><label>Texte de bienvenue</label><input name="home_welcome" value="{{ settings.home_welcome }}"></div><div><label>Libellé de la mise en avant</label><input name="home_featured_label" value="{{ settings.home_featured_label }}"></div>
+      <div><label>Titre si aucune fiche mise en avant</label><input name="home_empty_title" value="{{ settings.home_empty_title }}"></div><div><label>Texte si aucune fiche mise en avant</label><input name="home_empty_text" value="{{ settings.home_empty_text }}"></div>
+      <div><label>Bouton de la fiche mise en avant</label><input name="home_featured_cta" value="{{ settings.home_featured_cta }}"></div><div><label>Titre du bloc accès rapides</label><input name="home_quick_access_title" value="{{ settings.home_quick_access_title }}"></div>
+      <div><label>Surtitre du catalogue</label><input name="home_section_eyebrow" value="{{ settings.home_section_eyebrow }}"></div><div><label>Titre du catalogue</label><input name="home_section_title" value="{{ settings.home_section_title }}"></div>
+      <div class="field-full"><label>Accès rapides — un par ligne</label><textarea name="quick_links_text" rows="5" spellcheck="false">{{ quick_links_text }}</textarea><small class="field-help">Format : <code>Libellé | URL | Icône</code>. Exemple : Annuaire | https://annuaire.exemple.fr | ◉. Lien interne / ou HTTPS. Maximum 12 liens.</small></div>
+      <div><label>Titre des fiches populaires</label><input name="home_popular_title" value="{{ settings.home_popular_title }}"></div>
+      <div class="field-full"><label>Bloc HTML supplémentaire sur l'accueil</label><textarea name="home_custom_html" rows="7" spellcheck="false">{{ settings.home_custom_html }}</textarea><small class="field-help">Contenu HTML assaini à l'enregistrement. Utilisez les articles FAQ pour les procédures détaillées. Balises script et styles externes supprimés.</small></div>
+    </div></div>
+  </details>
+  <details class="admin-panel editor-section" open><summary><span>03</span><div><b>Questions et pages FAQ</b><small>Libellés affichés sur les fiches et le formulaire de question ouverte</small></div></summary>
+    <div class="editor-section-body"><div class="field-grid two">
+      <div><label>Titre du bloc « suivre la fiche »</label><input name="article_follow_title" value="{{ settings.article_follow_title }}"></div><div><label>Description du suivi</label><input name="article_follow_body" value="{{ settings.article_follow_body }}"></div>
+      <div><label>Bouton suivre</label><input name="article_follow_button" value="{{ settings.article_follow_button }}"></div><div><label>Bouton ne plus suivre</label><input name="article_unfollow_button" value="{{ settings.article_unfollow_button }}"></div>
+      <div><label>Titre du bloc d'aide</label><input name="article_help_title" value="{{ settings.article_help_title }}"></div><div><label>Texte du bloc d'aide</label><input name="article_help_body" value="{{ settings.article_help_body }}"></div>
+      <div><label>Bouton contacter le support</label><input name="article_help_button" value="{{ settings.article_help_button }}"></div><div><label>Titre des articles liés</label><input name="article_related_title" value="{{ settings.article_related_title }}"></div>
+      <div><label>Bouton suggestion</label><input name="article_suggestion_button" value="{{ settings.article_suggestion_button }}"></div><div><label>Surtitre formulaire question</label><input name="question_page_kicker" value="{{ settings.question_page_kicker }}"></div>
+      <div><label>Titre formulaire question</label><input name="question_page_title" value="{{ settings.question_page_title }}"></div><div><label>Texte d'introduction</label><input name="question_page_body" value="{{ settings.question_page_body }}"></div>
+      <div><label>Libellé objet</label><input name="question_title_label" value="{{ settings.question_title_label }}"></div><div><label>Libellé description</label><input name="question_body_label" value="{{ settings.question_body_label }}"></div>
+      <div><label>Bouton envoyer</label><input name="question_submit_button" value="{{ settings.question_submit_button }}"></div><div><label>Bouton annuler</label><input name="question_cancel_button" value="{{ settings.question_cancel_button }}"></div>
+      <div class="field-full"><label>Note de confidentialité du formulaire</label><input name="question_privacy_note" value="{{ settings.question_privacy_note }}"></div>
+      <div><label>Surtitre espace utilisateur</label><input name="user_area_eyebrow" value="{{ settings.user_area_eyebrow }}"></div><div><label>Titre « Mes questions »</label><input name="my_questions_title" value="{{ settings.my_questions_title }}"></div>
+      <div><label>Introduction « Mes questions »</label><input name="my_questions_intro" value="{{ settings.my_questions_intro }}"></div><div><label>Bouton nouvelle question</label><input name="my_questions_new_button" value="{{ settings.my_questions_new_button }}"></div>
+      <div><label>État vide « Mes questions »</label><input name="my_questions_empty_title" value="{{ settings.my_questions_empty_title }}"></div><div><label>Texte état vide « Mes questions »</label><input name="my_questions_empty_text" value="{{ settings.my_questions_empty_text }}"></div>
+      <div><label>Titre « Mes fiches suivies »</label><input name="my_follows_title" value="{{ settings.my_follows_title }}"></div><div><label>Introduction « Mes fiches suivies »</label><input name="my_follows_intro" value="{{ settings.my_follows_intro }}"></div>
+      <div><label>État vide des suivis</label><input name="my_follows_empty_title" value="{{ settings.my_follows_empty_title }}"></div><div><label>Texte état vide des suivis</label><input name="my_follows_empty_text" value="{{ settings.my_follows_empty_text }}"></div>
+      <div><label>Bouton explorer la FAQ</label><input name="my_follows_open_button" value="{{ settings.my_follows_open_button }}"></div><div><label>Bouton parcourir les fiches</label><input name="my_follows_list_button" value="{{ settings.my_follows_list_button }}"></div>
+      <div><label>Titre connexion locale</label><input name="login_title" value="{{ settings.login_title }}"></div><div><label>Texte connexion locale</label><input name="login_intro" value="{{ settings.login_intro }}"></div>
+      <div><label>Libellé identifiant</label><input name="login_username_label" value="{{ settings.login_username_label }}"></div><div><label>Libellé mot de passe</label><input name="login_password_label" value="{{ settings.login_password_label }}"></div>
+      <div><label>Bouton connexion</label><input name="login_submit_button" value="{{ settings.login_submit_button }}"></div><div><label>Surtitre aide fiche FAQ</label><input name="article_help_eyebrow" value="{{ settings.article_help_eyebrow }}"></div>
+      <div><label>Titre retour fiche</label><input name="article_feedback_title" value="{{ settings.article_feedback_title }}"></div><div><label>Texte retour fiche</label><input name="article_feedback_body" value="{{ settings.article_feedback_body }}"></div>
+    </div></div>
+  </details>
+  <details class="admin-panel editor-section" open><summary><span>04</span><div><b>Direction artistique</b><small>Palette, dégradé, typographie, largeur et formes</small></div></summary>
+    <div class="editor-section-body"><div class="field-grid three">
+      {% for key,label in [('brand_color','Couleur principale'),('secondary_color','Couleur secondaire'),('accent_red','Couleur accent / rouge'),('hero_gradient_start','Dégradé du bandeau — début'),('hero_gradient_mid','Dégradé du bandeau — milieu'),('hero_gradient_end','Dégradé du bandeau — fin'),('page_background','Fond des pages'),('surface_color','Fond des cartes'),('text_color','Couleur du texte'),('hero_overlay_color','Teinte de superposition du bandeau'),('page_overlay_color','Teinte de superposition du fond')] %}
+      <div class="color-edit-field"><label for="{{ key }}">{{ label }}</label><div><input type="color" value="{{ settings[key] }}" data-color-target="{{ key }}"><input id="{{ key }}" name="{{ key }}" value="{{ settings[key] }}" pattern="^#[0-9A-Fa-f]{6}$" required></div></div>
+      {% endfor %}
+      <div><label>Police principale</label><select name="font_family">{% for font in ['DM Sans','Manrope','Arial','Inter','system-ui'] %}<option value="{{ font }}" {% if settings.font_family == font %}selected{% endif %}>{{ font }}</option>{% endfor %}<option value="Police importée" {% if settings.font_file_url %}selected{% endif %}>Police importée</option></select></div>
+      <div class="field-full"><label>Importer une police personnalisée</label><div class="inline-upload-field"><input type="text" name="font_file_url" id="font_file_url" value="{{ settings.font_file_url }}" readonly placeholder="Aucune police importée"><input type="hidden" name="font_file_name" id="font_file_name" value="{{ settings.font_file_name }}"><input type="file" id="font_file" accept=".woff2,.woff,.ttf,.otf"></div><small class="field-help">Formats WOFF2, WOFF, TTF ou OTF · 5 Mo maximum. Une police importée remplace la police sélectionnée.</small></div>
+    </div>
+    <div class="background-editor-grid">
+      <section class="background-editor-panel"><h3>Image et bandeau d’accueil</h3><div class="field-grid two">
+        <div class="field-full"><label>Image de fond du bandeau</label><div class="inline-upload-field"><input type="text" name="hero_background_image" id="hero_background_image" value="{{ settings.hero_background_image }}" readonly placeholder="Aucune image — dégradé utilisé"><input type="file" id="hero_background_file" accept="image/png,image/jpeg,image/webp,image/gif"><button type="button" class="button button-light button-small" data-clear-field="hero_background_image">Retirer</button></div></div>
+        <div><label>Mode de dimensionnement</label><select name="hero_image_size" id="hero_image_size">{% for v,label in [('cover','Couvrir le bandeau'),('contain','Afficher toute l’image'),('100% 100%','Étirer sur le bandeau'),('auto','Taille native')] %}<option value="{{ v }}" {% if settings.hero_image_size == v %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+        <div><label>Répétition de l’image</label><select name="hero_image_repeat" id="hero_image_repeat">{% for v,label in [('no-repeat','Aucune'),('repeat','Répéter'),('repeat-x','Horizontalement'),('repeat-y','Verticalement')] %}<option value="{{ v }}" {% if settings.hero_image_repeat == v %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+        <div class="range-edit-field"><label for="hero_image_position_x">Position horizontale <output id="hero_image_position_x_value">{{ settings.hero_image_position_x }} %</output></label><input type="range" id="hero_image_position_x" name="hero_image_position_x" min="0" max="100" value="{{ settings.hero_image_position_x }}"></div>
+        <div class="range-edit-field"><label for="hero_image_position_y">Position verticale <output id="hero_image_position_y_value">{{ settings.hero_image_position_y }} %</output></label><input type="range" id="hero_image_position_y" name="hero_image_position_y" min="0" max="100" value="{{ settings.hero_image_position_y }}"></div>
+        <div class="range-edit-field"><label for="hero_overlay_opacity">Opacité de la teinte <output id="hero_overlay_opacity_value">{{ settings.hero_overlay_opacity }} %</output></label><input type="range" id="hero_overlay_opacity" name="hero_overlay_opacity" min="0" max="100" value="{{ settings.hero_overlay_opacity }}"></div>
+        <div><label>Hauteur minimale (px, 0 = auto)</label><input type="number" name="hero_min_height" id="hero_min_height" min="0" max="900" value="{{ settings.hero_min_height }}"></div>
+        <div><label>Marge supérieure (px)</label><input type="number" name="hero_padding_top" id="hero_padding_top" min="0" max="160" value="{{ settings.hero_padding_top }}"></div>
+        <div><label>Marge inférieure (px)</label><input type="number" name="hero_padding_bottom" id="hero_padding_bottom" min="0" max="160" value="{{ settings.hero_padding_bottom }}"></div>
+        <label class="toggle-line field-full"><input type="checkbox" name="hero_shape_enabled" id="hero_shape_enabled" {% if settings.hero_shape_enabled %}checked{% endif %}> Activer la forme décorative en bas du bandeau</label>
+        <div class="range-edit-field field-full"><label for="hero_shape_height">Hauteur de la forme décorative <output id="hero_shape_height_value">{{ settings.hero_shape_height }} px</output></label><input type="range" id="hero_shape_height" name="hero_shape_height" min="0" max="180" value="{{ settings.hero_shape_height }}"></div>
+      </div></section>
+      <section class="background-editor-panel"><h3>Fond général du site</h3><div class="field-grid two">
+        <div class="field-full"><label>Image de fond du site</label><div class="inline-upload-field"><input type="text" name="page_background_image" id="page_background_image" value="{{ settings.page_background_image }}" readonly placeholder="Aucune image — couleur unie utilisée"><input type="file" id="page_background_file" accept="image/png,image/jpeg,image/webp,image/gif"><button type="button" class="button button-light button-small" data-clear-field="page_background_image">Retirer</button></div></div>
+        <div><label>Mode de dimensionnement</label><select name="page_image_size" id="page_image_size">{% for v,label in [('cover','Couvrir la fenêtre'),('contain','Afficher toute l’image'),('100% 100%','Étirer sur la fenêtre'),('auto','Taille native')] %}<option value="{{ v }}" {% if settings.page_image_size == v %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+        <div><label>Répétition</label><select name="page_image_repeat" id="page_image_repeat">{% for v,label in [('no-repeat','Aucune'),('repeat','Répéter'),('repeat-x','Horizontalement'),('repeat-y','Verticalement')] %}<option value="{{ v }}" {% if settings.page_image_repeat == v %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+        <div><label>Défilement</label><select name="page_image_attachment" id="page_image_attachment"><option value="fixed" {% if settings.page_image_attachment == 'fixed' %}selected{% endif %}>Fixe à l’écran</option><option value="scroll" {% if settings.page_image_attachment == 'scroll' %}selected{% endif %}>Défile avec la page</option></select></div>
+        <div class="range-edit-field"><label for="page_image_position_x">Position horizontale <output id="page_image_position_x_value">{{ settings.page_image_position_x }} %</output></label><input type="range" id="page_image_position_x" name="page_image_position_x" min="0" max="100" value="{{ settings.page_image_position_x }}"></div>
+        <div class="range-edit-field"><label for="page_image_position_y">Position verticale <output id="page_image_position_y_value">{{ settings.page_image_position_y }} %</output></label><input type="range" id="page_image_position_y" name="page_image_position_y" min="0" max="100" value="{{ settings.page_image_position_y }}"></div>
+        <div class="range-edit-field field-full"><label for="page_overlay_opacity">Opacité de la teinte de lisibilité <output id="page_overlay_opacity_value">{{ settings.page_overlay_opacity }} %</output></label><input type="range" id="page_overlay_opacity" name="page_overlay_opacity" min="0" max="100" value="{{ settings.page_overlay_opacity }}"></div>
+      </div></section>
+    </div>
+    <div class="background-live-preview"><div class="theme-preview-header">Aperçu du bandeau et du fond — mise à jour en direct</div><div id="hero-style-preview" class="background-live-preview__hero"><div class="background-live-preview__hero-content"><b>Un portail clair et facile à utiliser</b><p>Positionnez votre image, réglez la teinte, la hauteur et la forme décorative.</p></div></div><div id="page-style-preview" class="background-live-preview__page"><div class="background-live-preview__page-card">Exemple de carte sur le fond général</div></div></div>
+    <div class="field-grid three" style="margin-top:16px"><div><label>Largeur maximale du contenu (px)</label><input type="number" name="content_max_width" min="900" max="1800" value="{{ settings.content_max_width }}"></div><div><label>Colonnes des cartes (bureau)</label><select name="cards_per_row">{% for n in range(2,7) %}<option value="{{ n }}" {% if settings.cards_per_row == n %}selected{% endif %}>{{ n }} colonnes</option>{% endfor %}</select></div><div><label>Arrondi des cartes (px)</label><input type="number" name="card_radius" min="0" max="28" value="{{ settings.card_radius }}"></div></div>
+    <div class="theme-live-preview"><div class="theme-preview-header">Aperçu de la palette</div><div class="theme-preview-swatches"><span style="background:{{ settings.brand_color }}">Principale</span><span style="background:{{ settings.secondary_color }}">Secondaire</span><span style="background:{{ settings.accent_red }}">Accent</span><span style="background:linear-gradient(100deg,{{ settings.hero_gradient_start }},{{ settings.hero_gradient_mid }},{{ settings.hero_gradient_end }})">Bandeau</span></div></div></div>
+  </details>
+  <details class="admin-panel editor-section" open><summary><span>05</span><div><b>Éléments visibles</b><small>Activez ou masquez les blocs sans supprimer les contenus</small></div></summary>
+    <div class="editor-section-body visibility-grid">
+      {% for key,label in [('show_nav','Navigation principale'),('show_search','Barre de recherche'),('show_hero','Bandeau d’accueil'),('show_quick_links','Accès rapides'),('show_categories','Filtres de catégories'),('show_popular','Fiches les plus consultées'),('show_question_cta','Bloc d’appel à question'),('show_article_views','Compteur de consultations sur une fiche'),('show_article_follow','Bouton de suivi de fiche'),('show_related_articles','Articles de la même catégorie'),('show_article_feedback','Lien de suggestion en bas de fiche'),('show_footer_secondary','Lien secondaire du pied de page')] %}
+      <label class="toggle-line"><input type="checkbox" name="{{ key }}" {% if settings[key] %}checked{% endif %}><span>{{ label }}</span></label>
+      {% endfor %}
+    </div>
+  </details>
+  <details class="admin-panel editor-section" open><summary><span>06</span><div><b>Pied de page</b><small>Mentions, texte complémentaire et lien</small></div></summary>
+    <div class="editor-section-body field-grid two"><div><label>Texte principal</label><input name="footer_text" value="{{ settings.footer_text }}"></div><div><label>Texte secondaire</label><input name="footer_secondary_text" value="{{ settings.footer_secondary_text }}"></div><div class="field-full"><label>URL du lien secondaire</label><input name="footer_secondary_url" value="{{ settings.footer_secondary_url }}"><small class="field-help">Lien interne / ou URL HTTPS.</small></div></div>
+  </details>
+  </div>
+  <div class="portal-save-bar"><span id="portal-tab-hint">Modifiez les paramètres de cette rubrique. Les autres rubriques restent accessibles en un clic.</span><button class="button button-primary" type="submit">Enregistrer toutes les modifications</button></div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('[data-color-target]').forEach(picker=>{const target=document.getElementById(picker.dataset.colorTarget);picker.addEventListener('input',()=>target.value=picker.value);target.addEventListener('input',()=>{if(/^#[0-9a-fA-F]{6}$/.test(target.value))picker.value=target.value})});
+document.getElementById('brand_logo_file')?.addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;const data=new FormData();data.append('file',file);try{const csrf=document.querySelector('input[name=csrf]').value;const r=await fetch('/admin/upload-image',{method:'POST',body:data,credentials:'same-origin',headers:{'X-CSRF-Token':csrf}});if(!r.ok)throw new Error('Téléversement refusé ('+r.status+').');const j=await r.json();document.getElementById('brand_logo_url').value=j.url}catch(err){alert('Impossible de charger le logo : '+err.message)}});
+
+
+async function uploadPortalAsset(inputId, targetId, endpoint, extraTargetId){
+  const input=document.getElementById(inputId); if(!input)return;
+  input.addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;const data=new FormData();data.append('file',file);try{const csrf=document.querySelector('input[name=csrf]').value;const r=await fetch(endpoint,{method:'POST',body:data,credentials:'same-origin',headers:{'X-CSRF-Token':csrf}});const j=await r.json();if(!r.ok)throw new Error(j.detail||'Téléversement refusé ('+r.status+').');document.getElementById(targetId).value=j.url;if(extraTargetId)document.getElementById(extraTargetId).value=j.name||'';updateBackgroundPreview();}catch(err){alert('Impossible de charger le fichier : '+err.message);input.value='';}});
+}
+uploadPortalAsset('hero_background_file','hero_background_image','/admin/upload-image');
+uploadPortalAsset('page_background_file','page_background_image','/admin/upload-image');
+uploadPortalAsset('font_file','font_file_url','/admin/upload-font','font_file_name');
+document.querySelectorAll('[data-clear-field]').forEach(b=>b.addEventListener('click',()=>{document.getElementById(b.dataset.clearField).value='';updateBackgroundPreview();}));
+
+function cssRgba(hex,percent){const value=(hex||'#ffffff').replace('#','');if(!/^[0-9a-fA-F]{6}$/.test(value))return 'rgba(255,255,255,0)';return `rgba(${parseInt(value.slice(0,2),16)},${parseInt(value.slice(2,4),16)},${parseInt(value.slice(4,6),16)},${Math.max(0,Math.min(100,Number(percent)||0))/100})`;}
+function fieldValue(id,fallback=''){return document.getElementById(id)?.value??fallback;}
+function updateRangeLabels(){['hero_image_position_x','hero_image_position_y','hero_overlay_opacity','hero_shape_height','page_image_position_x','page_image_position_y','page_overlay_opacity'].forEach(id=>{const input=document.getElementById(id),output=document.getElementById(id+'_value');if(input&&output)output.textContent=input.value+(id==='hero_shape_height'?' px':' %');});}
+function updateBackgroundPreview(){
+ const hero=document.getElementById('hero-style-preview'),page=document.getElementById('page-style-preview');if(!hero||!page)return;
+ const heroImage=fieldValue('hero_background_image'),heroOverlay=cssRgba(fieldValue('hero_overlay_color','#1e2a41'),fieldValue('hero_overlay_opacity',42));
+ const heroGradient=`linear-gradient(105deg,${fieldValue('hero_gradient_start','#53648f')},${fieldValue('hero_gradient_mid','#68465f')} 52%,${fieldValue('hero_gradient_end','#a33132')})`;
+ hero.style.backgroundImage=heroImage?`linear-gradient(${heroOverlay},${heroOverlay}),url("${heroImage}")`:heroGradient;
+ hero.style.backgroundSize=heroImage?`100% 100%,${fieldValue('hero_image_size','cover')}`:'cover';
+ hero.style.backgroundPosition=heroImage?`0 0,${fieldValue('hero_image_position_x',50)}% ${fieldValue('hero_image_position_y',50)}%`:'center';
+ hero.style.backgroundRepeat=heroImage?`no-repeat,${fieldValue('hero_image_repeat','no-repeat')}`:'no-repeat';
+ hero.style.paddingTop=(fieldValue('hero_padding_top',22))+'px';hero.style.paddingBottom=(fieldValue('hero_padding_bottom',16))+'px';hero.style.minHeight=(fieldValue('hero_min_height',0)||0)+'px';
+ hero.style.setProperty('--preview-shape-height',fieldValue('hero_shape_height',70)+'px');hero.style.setProperty('--preview-page-bg',fieldValue('page_background','#ffffff'));hero.classList.toggle('has-shape',!!document.getElementById('hero_shape_enabled')?.checked);
+ const pageImage=fieldValue('page_background_image'),pageOverlay=cssRgba(fieldValue('page_overlay_color','#ffffff'),fieldValue('page_overlay_opacity',84));
+ page.style.backgroundColor=fieldValue('page_background','#ffffff');page.style.backgroundImage=pageImage?`linear-gradient(${pageOverlay},${pageOverlay}),url("${pageImage}")`:'none';
+ page.style.backgroundSize=pageImage?`100% 100%,${fieldValue('page_image_size','cover')}`:'cover';page.style.backgroundPosition=pageImage?`0 0,${fieldValue('page_image_position_x',50)}% ${fieldValue('page_image_position_y',50)}%`:'center';page.style.backgroundRepeat=pageImage?`no-repeat,${fieldValue('page_image_repeat','no-repeat')}`:'no-repeat';
+ updateRangeLabels();
+}
+document.querySelectorAll('.background-editor-panel input,.background-editor-panel select').forEach(el=>{el.addEventListener('input',updateBackgroundPreview);el.addEventListener('change',updateBackgroundPreview);});
+document.querySelectorAll('[data-color-target],.color-edit-field input[type=text]').forEach(el=>el.addEventListener('input',updateBackgroundPreview));
+updateBackgroundPreview();
+
+const portalForm=document.getElementById('portal-editor-form');
+const portalTabs=[...document.querySelectorAll('[data-portal-tab]')];
+const portalPanels=[...document.querySelectorAll('.portal-editor-form .editor-section')];
+const hint=document.getElementById('portal-tab-hint');
+const hints=['Identité, logo, connexion et navigation.','Bandeau d’accueil, contenus mis en avant et accès rapides.','Libellés des fiches, questions, formulaires et espaces utilisateurs.','Palette, typographie, largeur et présentation des cartes.','Activez ou masquez les composants du portail.','Mentions et liens du pied de page.'];
+function activatePortalTab(index){portalTabs.forEach((b,i)=>b.classList.toggle('is-active',i===index));portalPanels.forEach((p,i)=>p.classList.toggle('is-active',i===index));if(hint)hint.textContent=hints[index]||'';sessionStorage.setItem('faq-portal-tab',String(index));}
+portalTabs.forEach(b=>b.addEventListener('click',()=>activatePortalTab(Number(b.dataset.portalTab))));
+activatePortalTab(Math.min(Number(sessionStorage.getItem('faq-portal-tab')||0),portalPanels.length-1));
+</script>
+{% endblock %}

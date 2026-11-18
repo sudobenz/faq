@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}{{ page.title }} — {{ settings.brand_name }}{% endblock %}
+{% block content %}
+<section class="cms-page-wrap"><div class="breadcrumbs"><a href="/">Accueil</a><span>/</span><span>{{ page.title }}</span></div><header class="cms-page-heading"><span class="eyebrow">{{ settings.brand_name }}</span><h1>{{ page.title }}</h1>{% if page.summary %}<p>{{ page.summary }}</p>{% endif %}</header><article class="rich-content cms-page-content">{{ page.content_html|safe }}</article></section>
+{% endblock %}

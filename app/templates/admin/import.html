@@ -1,0 +1,43 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Import FAQ — Administration{% endblock %}
+{% block admin_content %}
+<div class="admin-page-head"><div><span class="eyebrow">MIGRATION / ALIMENTATION</span><h1>Importer des articles</h1><p>Importez un document, plusieurs fichiers à la fois ou une archive ZIP complète.</p></div></div>
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+{% if import_report %}
+<section class="admin-panel" style="margin-bottom:20px">
+  <h2 style="margin-top:0">Résultat de l'import</h2>
+  <p>{{ import_report.successes|length }} élément(s) traité(s) avec succès · {{ import_report.errors|length }} erreur(s) · {{ import_report.total }} fichier(s) analysé(s)</p>
+  {% if import_report.successes %}<h3>Importés</h3><ul>{% for item in import_report.successes %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
+  {% if import_report.errors %}<h3>Erreurs</h3><ul>{% for item in import_report.errors %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
+</section>
+{% endif %}
+<div class="import-grid">
+  <form class="admin-panel import-panel" method="post" action="/admin/import" enctype="multipart/form-data">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <div class="upload-zone">
+      <div class="upload-icon">⇧</div><h3>Sélectionner les fichiers à importer</h3>
+      <p>Vous pouvez sélectionner plusieurs fichiers en une seule opération.</p>
+      <input type="file" name="files" multiple accept=".docx,.pdf,.csv,.json,.md,.markdown,.zip,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/json,text/csv,text/markdown,application/zip" required>
+      <p class="field-help">DOCX 20 Mo · PDF 30 Mo · Markdown 5 Mo · CSV / JSON 5 Mo · ZIP 150 Mo · 100 fichiers maximum par lot</p>
+    </div>
+    <label for="mode">Mode d'import</label>
+    <select name="mode" id="mode">
+      <option value="upsert">Mettre à jour les brouillons ayant le même slug, sinon créer</option>
+      <option value="create">Créer uniquement, sans remplacer les existants</option>
+    </select>
+    <button class="button button-primary button-block" type="submit">Lancer l'import du lot</button>
+  </form>
+  <div class="admin-panel import-help">
+    <span class="eyebrow">FORMATS PRIS EN CHARGE</span><h3>Import unitaire ou de masse</h3>
+    <p><b>Import multiple :</b> sélectionnez plusieurs DOCX, PDF ou fichiers Markdown dans le sélecteur.</p>
+    <p><b>Archive ZIP :</b> regroupez jusqu'à 100 documents dans une archive. Les sous-dossiers sont parcourus. Les fichiers pris en charge sont DOCX, PDF, Markdown, CSV et JSON. Les fichiers cachés et formats inconnus sont ignorés.</p>
+    <p><b>Word (.docx) :</b> conversion en article éditable. Les titres, paragraphes, listes, tableaux, liens et images compatibles sont repris. Le résultat est créé en brouillon.</p>
+    <p><b>Markdown (.md / .markdown) :</b> prise en charge des titres, listes, tableaux, liens, citations, blocs de code et mise en forme courante. Le résultat est créé en brouillon par défaut.</p>
+    <p><b>PDF :</b> création d'une fiche avec visionneuse intégrée. Le PDF reste stocké hors du répertoire statique.</p>
+    <p><b>CSV / JSON :</b> chaque ligne / objet représente un article. Champs reconnus : <code>title, slug, summary, content_html, content_markdown, category, tags, status, featured</code>.</p>
+    <p class="field-help">En mode « mettre à jour », seuls les brouillons existants sont remplacés. Une fiche déjà publiée n'est jamais écrasée par l'import : un nouvel article est créé avec un slug suffixé.</p>
+    <p class="field-help">Pour le Markdown, un front matter facultatif peut définir <code>title</code>, <code>slug</code>, <code>summary</code>, <code>category</code>, <code>tags</code>, <code>status</code> et <code>featured</code>.</p>
+    <a class="text-link" href="/static/import-exemple.json" download>Télécharger un exemple JSON →</a>
+  </div>
+</div>
+{% endblock %}

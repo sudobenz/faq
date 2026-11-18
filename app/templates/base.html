@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}{{ settings.brand_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+  <style>
+    {% if settings.font_file_url %}@font-face{font-family:"FAQCustom";src:url("{{ settings.font_file_url }}");font-display:swap}{% endif %}
+    :root{--accent:{{ settings.brand_color }};--accent-dark:{{ settings.secondary_color }};--accent-red:{{ settings.accent_red }};--hero-start:{{ settings.hero_gradient_start }};--hero-mid:{{ settings.hero_gradient_mid }};--hero-end:{{ settings.hero_gradient_end }};--page-bg:{{ settings.page_background }};--surface:{{ settings.surface_color }};--ink:{{ settings.text_color }};--content-max:{{ settings.content_max_width }}px;--card-radius:{{ settings.card_radius }}px;--font-main:{% if settings.font_file_url %}'FAQCustom'{% else %}'{{ settings.font_family }}'{% endif %},Arial,sans-serif;--hero-overlay:{{ settings.hero_overlay_rgba }};--page-overlay:{{ settings.page_overlay_rgba }};--hero-pad-top:{{ settings.hero_padding_top }}px;--hero-pad-bottom:{{ settings.hero_padding_bottom }}px;--hero-min-height:{{ settings.hero_min_height }}px;--hero-shape-height:{{ settings.hero_shape_height }}px;--hero-img-x:{{ settings.hero_image_position_x }}%;--hero-img-y:{{ settings.hero_image_position_y }}%;--page-img-x:{{ settings.page_image_position_x }}%;--page-img-y:{{ settings.page_image_position_y }}%}
+    body{background-color:var(--page-bg);{% if settings.page_background_image %}background-image:linear-gradient(var(--page-overlay),var(--page-overlay)),url("{{ settings.page_background_image }}");background-size:100% 100%,{{ settings.page_image_size }};background-position:0 0,var(--page-img-x) var(--page-img-y);background-repeat:no-repeat,{{ settings.page_image_repeat }};background-attachment:scroll,{{ settings.page_image_attachment }};{% else %}background-image:none;{% endif %}color:var(--ink);font-family:var(--font-main)}
+    .home-hero{padding-top:var(--hero-pad-top);padding-bottom:var(--hero-pad-bottom);min-height:var(--hero-min-height);background-color:var(--hero-start);{% if settings.hero_background_image %}background-image:linear-gradient(var(--hero-overlay),var(--hero-overlay)),url("{{ settings.hero_background_image }}");background-size:100% 100%,{{ settings.hero_image_size }};background-position:0 0,var(--hero-img-x) var(--hero-img-y);background-repeat:no-repeat,{{ settings.hero_image_repeat }};{% else %}background-image:linear-gradient(105deg,var(--hero-start),var(--hero-mid) 52%,var(--hero-end));background-size:cover;background-position:center;background-repeat:no-repeat;{% endif %}}
+    .home-hero:after{display:{% if settings.hero_shape_enabled %}block{% else %}none{% endif %};height:var(--hero-shape-height);bottom:calc(var(--hero-shape-height) * -.66);}
+    .header-inner,.nav-inner,.footer-inner,.article-layout,.cms-page-wrap{max-width:var(--content-max)}
+    .header-search,.quick-access-card,.article-card,.featured-story,.site-footer{background:var(--surface)}
+    .editorial-grid{grid-template-columns:repeat({{ settings.cards_per_row }},minmax(0,1fr))}
+    .editorial-card,.quick-access-card,.featured-story,.question-cta,.article-follow-panel{border-radius:var(--card-radius)}
+    .article-card-visual .category-label,.category-label{background:color-mix(in srgb,var(--accent) 13%,white);color:var(--accent)}
+    .main-nav a:hover,.nav-inner a:hover,.quick-access-card>a:hover{color:var(--accent-red)}
+    .button-primary{background:var(--accent)}.button-primary:hover{background:var(--accent-dark)}
+    @media(max-width:1100px){.editorial-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:760px){.editorial-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.header-inner,.nav-inner,.footer-inner,.article-layout,.cms-page-wrap{width:100%;max-width:100%}}
+    @media(max-width:480px){.editorial-grid{grid-template-columns:1fr}.article-card-visual{height:190px}.header-tools{flex-wrap:wrap}.header-tools .button{font-size:11px;padding:7px 9px}}
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<header class="site-header">
+  <div class="header-main"><div class="header-inner">
+    <a class="brand" href="/" aria-label="Accueil {{ settings.brand_name }}">
+      {% if settings.brand_logo_url %}<img class="brand-logo" src="{{ settings.brand_logo_url }}" alt="Logo {{ settings.brand_name }}">{% else %}<span class="brand-mark">{{ settings.brand_name[:1]|upper }}</span>{% endif %}
+      <span><strong>{{ settings.brand_name }}</strong><small>{{ settings.header_subtitle }}</small></span>
+    </a>
+    {% if settings.show_search %}<form class="header-search" action="/" method="get" role="search"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ q if q is defined else '' }}" placeholder="{{ settings.search_placeholder }}" aria-label="Rechercher dans la FAQ"><button type="submit" aria-label="Lancer la recherche">{{ settings.search_button_label }}</button></form>{% endif %}
+    <div class="header-tools">
+      {% if user %}
+        <a class="button button-account button-account-follows" href="/mes-fiches-suivies">
+          <svg class="account-action-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 3.5h9l3 3v10H4z"/><path d="M13 3.5v3h3M7 10h6M7 13h6"/></svg>
+          <span>{{ settings.my_follows_nav_label }}</span>
+        </a>
+        <a class="button button-account button-account-questions" href="/mes-questions">
+          <svg class="account-action-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M3.5 5.5h13v9h-13z"/><path d="m4 6 6 5 6-5"/></svg>
+          <span>{{ settings.my_questions_nav_label }}</span>
+        </a>
+        <span class="user-chip" title="{{ user.name }}">{{ user.name }}</span>
+        <a class="button button-light button-small logout-button" href="/auth/logout">{{ settings.logout_button_label }}</a>
+      {% else %}{% if oidc_configured %}<a class="button button-primary button-small" href="/auth/login">{{ settings.oidc_button_label }}</a>{% endif %}{% if local_auth_enabled %}<a class="button button-light button-small" href="/auth/local/login">{{ settings.local_button_label }}</a>{% endif %}{% if not oidc_configured and not local_auth_enabled %}<span class="config-warning">Authentification à configurer</span>{% endif %}{% endif %}
+    </div>
+  </div></div>
+  {% if settings.show_nav %}<nav class="nav-row" aria-label="Navigation principale"><div class="nav-inner">{% for item in nav_items %}<a href="{{ item.url }}" {% if item.url.startswith('https://') %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.label }}</a>{% endfor %}{% if is_admin %}<a href="/admin">Administration</a>{% endif %}</div></nav>{% endif %}
+</header>
+{% if flash %}<div class="flash flash-{{ flash.kind }}">{{ flash.message }}</div>{% endif %}
+{% if analytics_consent_pending %}<aside class="consent-banner"><div><b>Statistiques de fréquentation</b><p>Nous proposons de mesurer les consultations et recherches avec un identifiant aléatoire propre à ce navigateur. Pour ces statistiques, aucune adresse IP ni empreinte navigateur n'est conservée. Vous pouvez accepter ou refuser.</p></div><form method="post" action="/analytics/consent"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="button button-light button-small" name="decision" value="refused" type="submit">Refuser</button><button class="button button-primary button-small" name="decision" value="accepted" type="submit">Accepter</button></form></aside>{% endif %}
+<main>{% block content %}{% endblock %}</main>
+<footer class="site-footer"><div class="footer-inner"><span>{{ settings.footer_text }}</span><span>{% for page in footer_pages %}<a href="/contenu/{{ page.slug }}">{{ page.title }}</a> · {% endfor %}{% if settings.show_footer_secondary %}<a href="{{ settings.footer_secondary_url }}">{{ settings.footer_secondary_text }}</a>{% endif %}</span></div></footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "articles": [
+    {
+      "title": "Se connecter au réseau Wi-Fi professionnel",
+      "slug": "connexion-wifi-professionnel",
+      "summary": "Les étapes pour connecter un poste au réseau Wi-Fi de l'entreprise.",
+      "content_html": "<h2>Avant de commencer</h2><p>Vérifiez que votre compte professionnel est actif.</p><ol><li>Ouvrez les paramètres Wi-Fi.</li><li>Sélectionnez le réseau professionnel.</li><li>Authentifiez-vous avec votre compte habituel.</li></ol>",
+      "category": "Informatique",
+      "tags": "wifi, réseau, poste",
+      "status": "published",
+      "featured": false
+    }
+  ]
+}

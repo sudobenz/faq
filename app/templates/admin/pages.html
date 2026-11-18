@@ -1,0 +1,27 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Bibliothèque des pages — Administration{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/css/content-library.css">{% endblock %}
+{% block admin_content %}
+<div class="library-wrap" data-library="pages">
+  <header class="library-head"><div><span class="eyebrow">CMS · BIBLIOTHÈQUE</span><h1>Pages du portail</h1><p>Créez des pages autonomes pour présenter un service, expliquer une procédure ou publier une information. Les pages publiées peuvent être ajoutées à la navigation.</p></div><a class="button button-primary" href="/admin/pages/nouvelle">＋ Créer une page</a></header>
+  <section class="pages-workflow" aria-label="Comment créer une page">
+    <div class="pages-workflow-title"><div><b>Créer et publier une page</b><small>Un parcours simple en trois étapes</small></div><a href="/admin/pages/nouvelle" class="pages-start-link">Commencer <span>→</span></a></div>
+    <div class="pages-workflow-steps"><div><i>1</i><span><b>Créer</b><small>Donnez un titre et choisissez l’adresse de la page.</small></span></div><div><i>2</i><span><b>Rédiger</b><small>Ajoutez votre texte, des images et des blocs pratiques.</small></span></div><div><i>3</i><span><b>Prévisualiser et publier</b><small>Vérifiez le rendu avant de le rendre visible.</small></span></div></div>
+  </section>
+  <div class="library-metrics"><div><span>Pages au total</span><b>{{ pages|length }}</b></div><div><span>Publiées</span><b>{{ pages|selectattr('status','equalto','published')|list|length }}</b></div><div><span>Brouillons</span><b>{{ pages|selectattr('status','equalto','draft')|list|length }}</b></div></div>
+  <div class="library-toolbar"><label class="library-search"><span>⌕</span><input type="search" id="library-search" placeholder="Rechercher un titre, une URL, un résumé…" autocomplete="off"></label><div class="library-filters" role="group" aria-label="Filtrer par statut"><button class="active" data-filter="all" type="button">Toutes <b>{{ pages|length }}</b></button><button data-filter="published" type="button">Publiées <b>{{ pages|selectattr('status','equalto','published')|list|length }}</b></button><button data-filter="draft" type="button">Brouillons <b>{{ pages|selectattr('status','equalto','draft')|list|length }}</b></button></div><select id="library-sort" class="library-sort" aria-label="Trier les pages"><option value="updated">Dernière modification</option><option value="title">Titre A → Z</option><option value="created">Plus anciennes</option></select></div>
+  <div class="library-results-label"><b id="library-result-count">{{ pages|length }} contenu(s)</b><span>Les brouillons ne sont pas visibles sur le portail public.</span></div>
+  <div class="library-grid" id="library-grid">
+    {% for page in pages %}
+    <article class="library-card" data-status="{{ page.status }}" data-title="{{ page.title|lower }}" data-search="{{ (page.title ~ ' ' ~ page.slug ~ ' ' ~ page.summary)|lower }}" data-updated="{{ page.updated_at.timestamp() if page.updated_at else 0 }}" data-created="{{ page.created_at.timestamp() if page.created_at else 0 }}">
+      <div class="library-card-top"><span class="library-type-icon">▤</span><span class="library-status status-{{ page.status }}">{{ 'Publiée' if page.status == 'published' else 'Brouillon' }}</span></div>
+      <div class="library-card-body"><h2>{{ page.title }}</h2><p>{{ page.summary or 'Aucun résumé renseigné.' }}</p><code>/contenu/{{ page.slug }}</code></div>
+      <div class="library-card-meta"><span>Modifiée {{ page.updated_at.strftime('%d/%m/%Y à %H:%M') if page.updated_at else '—' }}</span><span>{{ 'Pied de page' if page.show_in_footer else 'Non référencée' }}</span></div>
+      <div class="library-card-actions"><a class="library-edit" href="/admin/pages/{{ page.id }}/modifier">Ouvrir l’éditeur <span>→</span></a>{% if page.status == 'published' %}<a href="/contenu/{{ page.slug }}" target="_blank" rel="noopener">Voir la page ↗</a>{% else %}<span class="library-unpublished">Non publiée</span>{% endif %}<form method="post" action="/admin/pages/{{ page.id }}/supprimer" onsubmit="return confirm('Supprimer définitivement cette page ?')"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button type="submit">Supprimer</button></form></div>
+    </article>
+    {% else %}<div class="library-empty" id="library-empty"><span>▤</span><h2>Votre bibliothèque est vide</h2><p>Créez votre première page pour présenter un service ou publier une information pratique.</p><a class="button button-primary" href="/admin/pages/nouvelle">Créer ma première page</a></div>{% endfor %}
+  </div>
+  <div class="library-empty library-empty-filtered" id="library-empty-filtered" hidden><span>⌕</span><h2>Aucun contenu trouvé</h2><p>Modifiez votre recherche ou choisissez un autre filtre.</p><button class="button button-light" type="button" id="clear-library-filters">Effacer les filtres</button></div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/content-library.js"></script>{% endblock %}

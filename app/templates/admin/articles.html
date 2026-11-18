@@ -1,0 +1,23 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Bibliothèque des FAQ — Administration{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/css/content-library.css">{% endblock %}
+{% block admin_content %}
+<div class="library-wrap" data-library="articles">
+  <header class="library-head"><div><span class="eyebrow">CMS · BASE DE CONNAISSANCES</span><h1>Articles FAQ</h1><p>Rédigez des tutoriels, classez les réponses et pilotez leur publication.</p></div><a class="button button-primary" href="/admin/articles/nouveau">＋ Créer une fiche</a></header>
+  <div class="library-metrics"><div><span>Fiches au total</span><b>{{ articles|length }}</b></div><div><span>Publiées</span><b>{{ articles|selectattr('status','equalto','published')|list|length }}</b></div><div><span>Brouillons</span><b>{{ articles|selectattr('status','equalto','draft')|list|length }}</b></div><div><span>Lectures cumulées</span><b>{{ articles|sum(attribute='views') }}</b></div></div>
+  <div class="library-toolbar"><label class="library-search"><span>⌕</span><input type="search" id="library-search" placeholder="Rechercher un titre, une catégorie, un mot-clé…" autocomplete="off"></label><div class="library-filters" role="group" aria-label="Filtrer par statut"><button class="active" data-filter="all" type="button">Toutes <b>{{ articles|length }}</b></button><button data-filter="published" type="button">Publiées <b>{{ articles|selectattr('status','equalto','published')|list|length }}</b></button><button data-filter="draft" type="button">Brouillons <b>{{ articles|selectattr('status','equalto','draft')|list|length }}</b></button></div><select id="library-sort" class="library-sort" aria-label="Trier les fiches"><option value="updated">Dernière modification</option><option value="views">Plus consultées</option><option value="title">Titre A → Z</option><option value="created">Plus anciennes</option></select></div>
+  <div class="library-results-label"><b id="library-result-count">{{ articles|length }} contenu(s)</b><span>Les fiches publiées sont accessibles sans authentification.</span></div>
+  <div class="library-grid" id="library-grid">
+    {% for article in articles %}
+    <article class="library-card" data-status="{{ article.status }}" data-title="{{ article.title|lower }}" data-search="{{ (article.title ~ ' ' ~ article.slug ~ ' ' ~ article.summary ~ ' ' ~ article.category ~ ' ' ~ article.tags)|lower }}" data-updated="{{ article.updated_at.timestamp() if article.updated_at else 0 }}" data-created="{{ article.created_at.timestamp() if article.created_at else 0 }}" data-views="{{ article.views }}">
+      <div class="library-card-top"><span class="library-type-icon">▧</span><span class="library-status status-{{ article.status }}">{{ 'Publiée' if article.status == 'published' else 'Brouillon' }}</span>{% if article.featured %}<span class="library-featured">À la une</span>{% endif %}</div>
+      <div class="library-card-body"><h2>{{ article.title }}</h2><p>{{ article.summary or 'Aucun résumé renseigné.' }}</p><div class="library-tags"><span>{{ article.category or 'Général' }}</span>{% if article.tags %}<span>{{ article.tags }}</span>{% endif %}</div><code>/faq/{{ article.slug }}</code></div>
+      <div class="library-card-meta"><span>{{ article.views }} lecture(s)</span><span>Modifiée {{ article.updated_at.strftime('%d/%m/%Y') if article.updated_at else '—' }}</span></div>
+      <div class="library-card-actions"><a class="library-edit" href="/admin/articles/{{ article.id }}/modifier">Ouvrir l’éditeur <span>→</span></a>{% if article.status == 'published' %}<a href="/faq/{{ article.slug }}" target="_blank" rel="noopener">Voir la fiche ↗</a>{% else %}<span class="library-unpublished">Non publiée</span>{% endif %}<form method="post" action="/admin/articles/{{ article.id }}/supprimer" onsubmit="return confirm('Supprimer définitivement cette fiche ?')"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button type="submit">Supprimer</button></form></div>
+    </article>
+    {% else %}<div class="library-empty" id="library-empty"><span>▧</span><h2>Votre base de connaissances est vide</h2><p>Créez une première fiche pour publier une réponse utile à vos collaborateurs.</p><a class="button button-primary" href="/admin/articles/nouveau">Créer ma première fiche</a></div>{% endfor %}
+  </div>
+  <div class="library-empty library-empty-filtered" id="library-empty-filtered" hidden><span>⌕</span><h2>Aucun contenu trouvé</h2><p>Modifiez votre recherche ou choisissez un autre filtre.</p><button class="button button-light" type="button" id="clear-library-filters">Effacer les filtres</button></div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/content-library.js"></script>{% endblock %}

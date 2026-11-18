@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Connexion administrateur — {{ settings.brand_name }}{% endblock %}
+{% block content %}
+<section class="form-page">
+  <div class="form-wrap" style="max-width:460px">
+    <div class="eyebrow">ACCÈS ADMINISTRATEUR</div>
+    <h1>{{ settings.login_title }}</h1>
+    <p class="form-intro">{{ settings.login_intro }}</p>
+    <form class="form-panel" method="post" action="/auth/local/login">
+      {% if error %}<div class="inline-error">{{ error }}</div>{% endif %}
+      <input type="hidden" name="csrf" value="{{ csrf_token }}">
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <label for="username">{{ settings.login_username_label }}</label>
+      <input id="username" name="username" type="text" autocomplete="username" value="{{ username or '' }}" required autofocus>
+      <label for="password">{{ settings.login_password_label }}</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <div class="form-actions"><button class="button button-primary" type="submit">{{ settings.login_submit_button }}</button></div>
+    </form>
+    {% if oidc_configured %}<p style="text-align:center;margin-top:18px"><a class="text-link" href="/auth/login">Utiliser la connexion entreprise (OIDC)</a></p>{% endif %}
+  </div>
+</section>
+{% endblock %}

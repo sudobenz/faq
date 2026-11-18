@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: faq-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-faqdb}
+      POSTGRES_USER: ${POSTGRES_USER:-faquser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Définir POSTGRES_PASSWORD dans le fichier .env}
+    volumes:
+      - faq_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-faquser} -d ${POSTGRES_DB:-faqdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - faq-internal
+
+  faq:
+    build: .
+    container_name: faq-portal
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://faquser:${POSTGRES_PASSWORD}@db:5432/faqdb}
+   # ports:
+   #   - "${FAQ_PORT:-8000}:8000"
+    volumes:
+      - faq_uploads:/app/app/static/uploads
+      - faq_documents:/app/app/private_documents
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - faq-internal
+      - reverse-proxy
+
+volumes:
+  faq_postgres_data:
+  faq_uploads:
+  faq_documents:
+
+networks:
+  faq-internal:
+    driver: bridge
+  reverse-proxy:
+    external: true
+    name: ${PROXY_NETWORK:-reverse-proxy}

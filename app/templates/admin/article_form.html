@@ -1,0 +1,17 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ 'Modifier' if article else 'Créer' }} un article — CMS{% endblock %}
+{% block head %}<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"><link rel="stylesheet" href="/static/css/content-studio.css">{% endblock %}
+{% block admin_content %}
+{% set initial_title = draft_revision.title if draft_revision else (article.title if article else '') %}
+{% set initial_slug = draft_revision.slug if draft_revision else (article.slug if article else '') %}
+{% set initial_summary = draft_revision.summary if draft_revision else (article.summary if article else '') %}
+{% set initial_content = draft_revision.content_html if draft_revision else (article.content_html if article else '') %}
+{% set initial_status = article.status if article else 'draft' %}
+{% set initial_category = (draft_meta.get('category', article.category) if draft_revision else (article.category if article else 'Général')) %}
+{% set initial_tags = (draft_meta.get('tags', article.tags) if draft_revision else (article.tags if article else '')) %}
+{% set initial_featured = (draft_meta.get('featured', article.featured) if draft_revision else (article.featured if article else false)) %}
+{% set initial_show_footer = false %}
+{% set content_type = 'article' %}{% set content_id = article.id if article else 0 %}{% set id_field = 'article_id' %}{% set save_action = '/admin/articles/enregistrer' %}{% set back_url = '/admin/articles' %}
+{% include 'admin/content_editor_partial.html' %}
+{% endblock %}
+{% block scripts %}<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script><script src="/static/js/content-studio.js"></script>{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Préférences de statistiques — {{ settings.brand_name }}{% endblock %}
+{% block content %}
+<section class="content-wrap narrow-wrap"><div class="section-heading"><div><span class="eyebrow">CONFIDENTIALITÉ</span><h1>Préférences de statistiques</h1><p class="muted">Vous pouvez modifier votre choix à tout moment depuis cette page.</p></div></div>
+<div class="admin-panel branding-form"><p><strong>Choix actuel :</strong> {% if analytics_consent == 'accepted' %}statistiques acceptées{% elif analytics_consent == 'refused' %}statistiques refusées{% else %}aucun choix enregistré{% endif %}</p><p>Les statistiques utilisent un identifiant aléatoire propre au navigateur, transformé par HMAC avant stockage. Les adresses IP et les user-agents ne sont pas enregistrés dans les événements analytiques.</p><div class="form-actions"><form method="post" action="/analytics/consent"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="button button-light" type="submit" name="decision" value="refused">Refuser les statistiques</button><button class="button button-primary" type="submit" name="decision" value="accepted">Accepter les statistiques</button></form></div></div>
+</section>
+{% endblock %}

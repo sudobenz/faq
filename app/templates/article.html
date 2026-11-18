@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title }} — {{ settings.brand_name }}{% endblock %}
+{% block content %}
+<div class="article-layout">
+  <article class="article-main">
+    <div class="breadcrumbs"><a href="/">Accueil</a><span>/</span><a href="/?category={{ article.category|urlencode }}">{{ article.category }}</a><span>/</span><span>Fiche pratique</span></div>
+    <div class="article-heading"><span class="category-label">{{ article.category }}</span><h1>{{ article.title }}</h1>{% if article.summary %}<p class="article-summary">{{ article.summary }}</p>{% endif %}<div class="article-meta"><span>Mis à jour le {{ article.updated_at.strftime('%d/%m/%Y') if article.updated_at else '—' }}</span>{% if settings.show_article_views %}<span>·</span><span>{{ article.views }} consultation(s)</span>{% endif %}{% if settings.show_article_follow %}<span>·</span><span>{{ follower_count }} suivi(s)</span>{% endif %}</div></div>
+    {% if article.cover_image %}<figure class="article-cover"><img src="{{ article.cover_image }}" alt="Illustration de {{ article.title }}"></figure>{% endif %}
+    {% if settings.show_article_follow %}<div class="article-follow-panel">
+      <div><b>{{ settings.article_follow_title }}</b><small>{{ settings.article_follow_body }}</small></div>
+      {% if user %}<form method="post" action="/faq/{{ article.slug }}/suivre"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="button {% if is_following %}button-light{% else %}button-primary{% endif %} button-small" type="submit">{% if is_following %}{{ settings.article_unfollow_button }}{% else %}{{ settings.article_follow_button }}{% endif %}</button></form>{% else %}<a class="button button-light button-small" href="/auth/login?next=/faq/{{ article.slug|urlencode }}">Se connecter pour suivre</a>{% endif %}
+    </div>{% endif %}
+    <div class="rich-content">{{ article.content_html|safe }}</div>
+    {% if article.tags %}<div class="tag-list">{% for tag in article.tags.split(',') %}<span>#{{ tag.strip() }}</span>{% endfor %}</div>{% endif %}
+    {% if settings.show_article_feedback %}<div class="article-feedback"><div><b>{{ settings.article_feedback_title }}</b><small>{{ settings.article_feedback_body }}</small></div><a class="button button-light button-small" href="mailto:?subject=Suggestion%20sur%20la%20FAQ%20-%20{{ article.title|urlencode }}">{{ settings.article_suggestion_button }}</a></div>{% endif %}
+  </article>
+  <aside class="article-aside"><div class="aside-box"><span class="eyebrow">{{ settings.article_help_eyebrow }}</span><h3>{{ settings.article_help_title }}</h3><p>{{ settings.article_help_body }}</p><a class="button button-primary button-block" href="/questions/nouvelle">{{ settings.article_help_button }}</a></div>{% if related and settings.show_related_articles %}<div class="aside-box related-box"><b>{{ settings.article_related_title }}</b>{% for item in related %}<a href="/faq/{{ item.slug }}">{{ item.title }} <span>→</span></a>{% endfor %}</div>{% endif %}</aside>
+</div>
+{% endblock %}

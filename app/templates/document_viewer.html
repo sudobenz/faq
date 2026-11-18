@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ document_title|e }}</title>
+<style>
+:root{color-scheme:light;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}*{box-sizing:border-box}body{margin:0;background:#eef1f6;color:#1b2940}.viewer{min-height:100vh;display:flex;flex-direction:column}.toolbar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #dce3ed;padding:10px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;box-shadow:0 2px 8px #1b294010}.doc-title{font-size:13px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:min(36vw,420px);margin-right:auto}.toolbar button,.toolbar select{border:1px solid #d5deea;background:#fff;color:#253751;border-radius:7px;padding:8px 11px;font-size:12px;cursor:pointer}.toolbar button:disabled{opacity:.4;cursor:not-allowed}.page-state{font-size:12px;color:#61718a;white-space:nowrap}.stage{padding:22px 12px 40px;display:flex;justify-content:center;align-items:flex-start;flex:1;overflow:auto}.page-wrap{background:#fff;box-shadow:0 5px 25px #1b29401c;min-height:250px;position:relative}.page-wrap canvas{display:block;max-width:100%;height:auto}.status{margin:auto;padding:30px;color:#68788f;font-size:13px;text-align:center}.error{color:#a22b2b}.toolbar button:focus-visible{outline:3px solid #8ab4f8;outline-offset:2px}@media(max-width:620px){.toolbar{gap:6px;padding:8px}.doc-title{order:-1;width:100%;max-width:100%;margin:0 0 3px}.toolbar button{padding:7px 9px}.stage{padding:12px 0}}
+</style></head>
+<body><main class="viewer"><header class="toolbar"><div class="doc-title" title="{{ document_title|e }}">{{ document_title }}</div><button id="prev" type="button" disabled>← Précédente</button><span class="page-state">Page <b id="page_num">—</b> / <b id="page_count">—</b></span><button id="next" type="button" disabled>Suivante →</button><button id="zoom_out" type="button" aria-label="Dézoomer">−</button><select id="zoom" aria-label="Zoom"><option value="0.75">75 %</option><option value="0.9">90 %</option><option value="1" selected>100 %</option><option value="1.25">125 %</option><option value="1.5">150 %</option><option value="2">200 %</option></select><button id="zoom_in" type="button" aria-label="Zoomer">+</button><button id="fullscreen" type="button">Plein écran</button></header><section class="stage" id="stage"><div id="status" class="status">Chargement du document…</div><div class="page-wrap" id="page_wrap" hidden><canvas id="page_canvas"></canvas></div></section></main>
+<script type="module">
+const PDF_URL={{ document_url|tojson }};
+const statusEl=document.getElementById('status'),canvas=document.getElementById('page_canvas'),wrap=document.getElementById('page_wrap'),ctx=canvas.getContext('2d');
+let pdf=null,pageNumber=1,scale=1,renderTask=null;
+try{
+ const pdfjs=await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs');
+ pdfjs.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
+ pdf=await pdfjs.getDocument({url:PDF_URL,withCredentials:true}).promise;
+ document.getElementById('page_count').textContent=pdf.numPages;
+ wrap.hidden=false;statusEl.hidden=true;
+ async function renderPage(){
+  if(renderTask){try{renderTask.cancel()}catch(e){}}
+  const page=await pdf.getPage(pageNumber),viewport=page.getViewport({scale});
+  const ratio=window.devicePixelRatio||1;canvas.width=Math.floor(viewport.width*ratio);canvas.height=Math.floor(viewport.height*ratio);
+  canvas.style.width=viewport.width+'px';canvas.style.height=viewport.height+'px';ctx.setTransform(ratio,0,0,ratio,0,0);
+  renderTask=page.render({canvasContext:ctx,viewport});await renderTask.promise;
+  document.getElementById('page_num').textContent=pageNumber;
+  document.getElementById('prev').disabled=pageNumber<=1;document.getElementById('next').disabled=pageNumber>=pdf.numPages;
+ }
+ document.getElementById('prev').onclick=()=>{if(pageNumber>1){pageNumber--;renderPage()}};
+ document.getElementById('next').onclick=()=>{if(pageNumber<pdf.numPages){pageNumber++;renderPage()}};
+ document.getElementById('zoom').onchange=e=>{scale=Number(e.target.value);renderPage()};
+ document.getElementById('zoom_in').onclick=()=>{scale=Math.min(2,scale+.15);syncZoom();renderPage()};
+ document.getElementById('zoom_out').onclick=()=>{scale=Math.max(.5,scale-.15);syncZoom();renderPage()};
+ function syncZoom(){document.getElementById('zoom').value=String([.75,.9,1,1.25,1.5,2].reduce((a,b)=>Math.abs(b-scale)<Math.abs(a-scale)?b:a))}
+ document.getElementById('fullscreen').onclick=()=>{const root=document.querySelector('.viewer');if(!document.fullscreenElement)root.requestFullscreen?.();else document.exitFullscreen?.()};
+ await renderPage();
+}catch(error){statusEl.textContent='Impossible d’afficher ce document. Vérifiez votre connexion et réessayez ou contactez le support.';statusEl.classList.add('error');console.error(error)}
+// Le lecteur n'expose volontairement ni bouton de téléchargement ni bouton d'impression.
+</script></body></html>

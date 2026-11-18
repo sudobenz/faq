@@ -1,0 +1,15 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ 'Modifier' if page else 'Créer' }} une page — CMS{% endblock %}
+{% block head %}<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"><link rel="stylesheet" href="/static/css/content-studio.css">{% endblock %}
+{% block admin_content %}
+{% set initial_title = draft_revision.title if draft_revision else (page.title if page else '') %}
+{% set initial_slug = draft_revision.slug if draft_revision else (page.slug if page else '') %}
+{% set initial_summary = draft_revision.summary if draft_revision else (page.summary if page else '') %}
+{% set initial_content = draft_revision.content_html if draft_revision else (page.content_html if page else '') %}
+{% set initial_status = page.status if page else 'draft' %}
+{% set initial_show_footer = (draft_meta.get('show_in_footer', page.show_in_footer) if draft_revision else (page.show_in_footer if page else false)) %}
+{% set initial_category = 'Général' %}{% set initial_tags = '' %}{% set initial_featured = false %}
+{% set content_type = 'page' %}{% set content_id = page.id if page else 0 %}{% set id_field = 'page_id' %}{% set save_action = '/admin/pages/enregistrer' %}{% set back_url = '/admin/pages' %}
+{% include 'admin/content_editor_partial.html' %}
+{% endblock %}
+{% block scripts %}<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script><script src="/static/js/content-studio.js"></script>{% endblock %}

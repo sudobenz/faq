@@ -1,0 +1,26 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Identité visuelle — Administration{% endblock %}
+{% block admin_content %}
+<div class="admin-page-head"><div><span class="eyebrow">PERSONNALISATION</span><h1>Identité visuelle</h1><p>Adaptez le portail à la charte graphique de votre organisation.</p></div></div>
+<form class="admin-panel branding-form" method="post" action="/admin/branding"><input type="hidden" name="csrf" value="{{ csrf_token }}"><div class="branding-grid"><div><label for="brand_name">Nom du portail</label><input id="brand_name" name="brand_name" value="{{ settings.brand_name }}" required maxlength="100"><label for="brand_tagline">Accroche de la page d'accueil</label><input id="brand_tagline" name="brand_tagline" value="{{ settings.brand_tagline }}" maxlength="200"><label for="brand_logo_url">URL du logo</label><input id="brand_logo_url" name="brand_logo_url" value="{{ settings.brand_logo_url }}" placeholder="/static/uploads/logo.png ou https://…"><label for="logo_file">Importer un logo</label><input type="file" id="logo_file" accept="image/png,image/jpeg,image/webp,image/gif"><p class="field-help">PNG, JPEG, WEBP ou GIF · 5 Mo maximum. Le téléchargement renseigne automatiquement l'URL ci-dessus.</p><label for="footer_text">Texte de pied de page</label><input id="footer_text" name="footer_text" value="{{ settings.footer_text }}" maxlength="250"></div><div class="color-settings"><label for="brand_color">Couleur principale</label><div class="color-input"><input type="color" id="brand_color_picker" value="{{ settings.brand_color }}"><input id="brand_color" name="brand_color" value="{{ settings.brand_color }}" pattern="^#[0-9A-Fa-f]{6}$"></div><div class="brand-preview">{% if settings.brand_logo_url %}<img id="logo-preview" src="{{ settings.brand_logo_url }}" alt="Logo" style="max-width:110px;max-height:48px;object-fit:contain;display:block;margin-bottom:10px">{% else %}<img id="logo-preview" alt="Aperçu du logo" style="display:none;max-width:110px;max-height:48px;object-fit:contain;margin-bottom:10px">{% endif %}<span class="brand-preview-mark" id="brand-preview-mark">?</span><b id="preview-name">{{ settings.brand_name }}</b><p id="preview-tagline">{{ settings.brand_tagline }}</p><button type="button" class="button button-primary">Bouton principal</button></div></div></div><div class="form-actions"><button class="button button-primary" type="submit">Enregistrer l'identité visuelle</button></div></form>
+{% endblock %}
+{% block scripts %}<script>
+const colorPicker=document.getElementById('brand_color_picker'),colorText=document.getElementById('brand_color');
+colorPicker.addEventListener('input',()=>{colorText.value=colorPicker.value;document.documentElement.style.setProperty('--accent',colorPicker.value)});
+colorText.addEventListener('input',()=>{if(/^#[0-9a-fA-F]{6}$/.test(colorText.value)){colorPicker.value=colorText.value;document.documentElement.style.setProperty('--accent',colorText.value)}});
+document.getElementById('brand_name').addEventListener('input',e=>document.getElementById('preview-name').textContent=e.target.value);
+document.getElementById('brand_tagline').addEventListener('input',e=>document.getElementById('preview-tagline').textContent=e.target.value);
+document.getElementById('logo_file').addEventListener('change',async e=>{
+  const file=e.target.files?.[0]; if(!file) return;
+  const data=new FormData(); data.append('file',file);
+  try {
+    const csrf=document.querySelector('input[name=csrf]').value;
+    const response=await fetch('/admin/upload-image',{method:'POST',body:data,credentials:'same-origin',headers:{'X-CSRF-Token':csrf}});
+    if(!response.ok) throw new Error('Téléversement refusé ('+response.status+').');
+    const result=await response.json();
+    document.getElementById('brand_logo_url').value=result.url;
+    const preview=document.getElementById('logo-preview'); preview.src=result.url; preview.style.display='block';
+    document.getElementById('brand-preview-mark').style.display='none';
+  } catch(error) { alert('Impossible de charger le logo : '+error.message); }
+});
+</script>{% endblock %}

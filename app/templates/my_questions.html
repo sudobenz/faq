@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Mes questions — {{ settings.brand_name }}{% endblock %}
+{% block content %}
+<section class="content-wrap narrow-wrap"><div class="section-heading"><div><span class="eyebrow">{{ settings.user_area_eyebrow }}</span><h1>{{ settings.my_questions_title }}</h1><p class="muted">{{ settings.my_questions_intro }}</p></div><a class="button button-primary" href="/questions/nouvelle">{{ settings.my_questions_new_button }}</a></div>
+{% if questions %}<div class="question-list">{% for question in questions %}<div class="question-item"><div class="question-item-head"><b>{{ question.title }}</b><span class="status status-{{ question.status }}">{{ {'new':'Nouvelle','in_progress':'En cours','answered':'Répondue','closed':'Clôturée'}.get(question.status, question.status) }}</span></div><p>{{ question.body }}</p><small>Envoyée le {{ question.created_at.strftime('%d/%m/%Y à %H:%M') if question.created_at else '—' }}</small>{% if question.answer %}<div class="answer-box"><b>Réponse</b><p>{{ question.answer }}</p></div>{% endif %}</div>{% endfor %}</div>{% else %}<div class="empty-state"><h3>{{ settings.my_questions_empty_title }}</h3><p>{{ settings.my_questions_empty_text }}</p></div>{% endif %}</section>
+{% endblock %}

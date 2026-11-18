@@ -1,0 +1,106 @@
+<div class="content-studio" id="content-studio"
+     data-content-type="{{ content_type }}"
+     data-content-id="{{ content_id }}"
+     data-original-status="{{ initial_status }}"
+     data-autosave-url="/admin/content/autosave"
+     data-revisions-url="/admin/content/{{ content_type }}/{{ content_id }}/revisions">
+  <form method="post" action="{{ save_action }}" id="content-studio-form" enctype="multipart/form-data" autocomplete="off">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <input type="hidden" name="{{ id_field }}" id="content-id" value="{{ content_id }}">
+    <input type="hidden" name="content_html" id="content-html">
+
+    <header class="studio-topbar">
+      <div class="studio-topbar-left">
+        <a class="studio-back" href="{{ back_url }}" aria-label="Retour à la bibliothèque">←</a>
+        <div class="studio-crumbs"><span>Bibliothèque</span><b>/</b><strong>{{ 'Page personnalisée' if content_type == 'page' else 'Article FAQ' }}</strong></div>
+        <span class="studio-kind">{{ 'PAGE' if content_type == 'page' else 'FAQ' }}</span>
+      </div>
+      <div class="studio-topbar-right">
+        <span class="studio-save-state" id="save-state" aria-live="polite"><i></i><span>En attente de modifications</span></span>
+        <button class="studio-button studio-button-quiet" type="button" id="preview-button">Aperçu</button>
+        <button class="studio-button studio-button-soft" type="button" id="save-button">Sauvegarder</button>
+        <button class="studio-button studio-button-primary" type="button" id="publish-button">{{ 'Publier' if initial_status != 'published' else 'Enregistrer et publier' }}</button>
+      </div>
+    </header>
+
+    {% if draft_revision %}
+    <div class="studio-recovery-banner" role="status">
+      <span class="studio-recovery-icon">↻</span>
+      <div><strong>Version de travail récupérée</strong><small>Une sauvegarde automatique plus récente que la version enregistrée a été restaurée dans l’éditeur. Elle n’est pas encore publiée.</small></div>
+      <button type="button" id="dismiss-recovery" aria-label="Masquer">×</button>
+    </div>
+    {% endif %}
+
+    <div class="studio-layout">
+      <main class="studio-main">
+        <div class="studio-document-head">
+          <div class="studio-document-label">{{ 'PAGE DU PORTAIL' if content_type == 'page' else 'FICHE PRATIQUE' }} <span>•</span> ÉDITION <small class="studio-context-help">{{ 'Une page sert à présenter une information stable ou un service. Elle peut être ajoutée au menu.' if content_type == 'page' else 'Une fiche FAQ répond à une question concrète et se classe dans une catégorie.' }}</small></div>
+          <input class="studio-title-input" type="text" name="title" id="content-title" required maxlength="220" value="{{ initial_title }}" placeholder="Donnez un titre explicite…" aria-label="Titre du contenu">
+          <div class="studio-url-line"><span class="studio-url-prefix">{{ '/contenu/' if content_type == 'page' else '/faq/' }}</span><input type="text" name="slug" id="content-slug" value="{{ initial_slug }}" maxlength="240" aria-label="Adresse du contenu"><span class="studio-url-status">URL publique</span></div>
+          <textarea class="studio-summary-input" name="summary" id="content-summary" rows="2" maxlength="500" placeholder="Ajoutez un résumé : il apparaîtra dans les résultats de recherche et les aperçus.">{{ initial_summary }}</textarea>
+        </div>
+
+        <section class="studio-editor-card" aria-label="Éditeur de contenu">
+          <div class="studio-editor-heading"><div><strong>Contenu</strong><small>Écrivez simplement. La mise en forme reste cohérente sur tout le portail.</small></div><div class="studio-editor-tools"><button type="button" data-editor-action="callout" title="Insérer un encadré de conseil">+ Encadré</button><button type="button" data-editor-action="checklist" title="Insérer une liste à cocher">☑ Étapes</button><button type="button" data-editor-action="divider" title="Insérer un séparateur">— Séparateur</button></div></div>
+          <div id="cms-toolbar" class="studio-quill-toolbar">
+            <span class="ql-formats"><select class="ql-header"><option selected></option><option value="2"></option><option value="3"></option><option value="4"></option></select></span>
+            <span class="ql-formats"><button class="ql-bold" title="Gras"></button><button class="ql-italic" title="Italique"></button><button class="ql-underline" title="Souligné"></button><button class="ql-strike" title="Barré"></button></span>
+            <span class="ql-formats"><button class="ql-list" value="ordered" title="Liste numérotée"></button><button class="ql-list" value="bullet" title="Liste à puces"></button><button class="ql-list" value="checked" title="Liste à cocher"></button></span>
+            <span class="ql-formats"><button class="ql-blockquote" title="Citation / encadré"></button><button class="ql-code-block" title="Bloc de code"></button></span>
+            <span class="ql-formats"><button class="ql-link" title="Insérer un lien"></button><button class="ql-image" title="Insérer une image"></button></span>
+            <span class="ql-formats"><select class="ql-align" title="Alignement"></select><button class="ql-clean" title="Effacer la mise en forme"></button></span>
+          </div>
+          <div id="cms-editor" class="studio-quill-editor">{{ initial_content|safe }}</div>
+          <div class="studio-editor-footer"><span>Astuce : glissez une image dans le texte ou collez-la depuis le presse-papiers.</span><span><b id="word-count">0</b> mots&nbsp; · &nbsp;<b id="reading-time">1</b> min de lecture</span></div>
+        </section>
+        <section class="studio-outline-card"><div class="studio-outline-heading"><strong>Structure du contenu</strong><small>Navigation rapide dans vos titres</small></div><div id="content-outline" class="studio-outline-empty">Ajoutez des titres H2 ou H3 pour générer le plan automatiquement.</div></section>
+      </main>
+
+      <aside class="studio-inspector">
+        <nav class="inspector-tabs" aria-label="Paramètres du contenu"><button type="button" class="active" data-inspector-tab="0">Publication</button>{% if content_type == 'article' %}<button type="button" data-inspector-tab="1">Organisation</button>{% endif %}<button type="button" data-inspector-tab="2">Référencement</button><button type="button" data-inspector-tab="3">Historique</button></nav>
+        <section class="inspector-card" data-inspector-panel="0">
+          <div class="inspector-heading"><div><span class="inspector-icon">◉</span><strong>Publication</strong></div><span class="inspector-dot"></span></div>
+          <label class="inspector-label" for="content-status">Statut</label>
+          <select name="status" id="content-status" class="inspector-select"><option value="draft" {% if initial_status != 'published' %}selected{% endif %}>Brouillon</option><option value="published" {% if initial_status == 'published' %}selected{% endif %}>Publié</option></select>
+          <div class="inspector-info"><span>Visibilité</span><b id="visibility-label">{{ 'Visible par tous' if initial_status == 'published' else 'Administrateurs uniquement' }}</b></div>
+          {% if content_type == 'page' %}
+          <label class="inspector-check"><input type="checkbox" name="show_in_footer" id="content-footer" {% if initial_show_footer %}checked{% endif %}><span><b>Afficher dans le pied de page</b><small>Ajoute un lien en bas du portail.</small></span></label>
+          {% else %}
+          <label class="inspector-check"><input type="checkbox" name="featured" id="content-featured" {% if initial_featured %}checked{% endif %}><span><b>Mettre à la une</b><small>Met en avant cette fiche sur l’accueil.</small></span></label>
+          {% endif %}
+        </section>
+
+        {% if content_type == 'article' %}
+        <section class="inspector-card" data-inspector-panel="1">
+          <div class="inspector-heading"><div><span class="inspector-icon">⌘</span><strong>Organisation</strong></div></div>
+          <label class="inspector-label" for="cover-image-file">Image personnalisée de la tuile</label>
+          <input class="inspector-input" type="file" id="cover-image-file" accept="image/png,image/jpeg,image/webp,image/gif">
+          <input type="hidden" name="cover_image" id="cover-image-url" value="{{ article.cover_image if article else '' }}">
+          <div id="cover-image-preview" class="cover-image-preview" {% if not article or not article.cover_image %}hidden{% endif %}>{% if article and article.cover_image %}<img src="{{ article.cover_image }}" alt="Aperçu de l’image de tuile">{% endif %}<button type="button" id="cover-image-remove">Retirer l’image</button></div>
+          <small class="inspector-hint">Facultatif · PNG, JPEG, WEBP ou GIF · 5 Mo maximum. Cette image remplace l’illustration générique sur la tuile de la page d’accueil.</small>
+          <label class="inspector-label" for="pdf-file">Document PDF associé</label>
+          <input class="inspector-input" type="file" name="pdf_file" id="pdf-file" accept="application/pdf,.pdf">
+          <small class="inspector-hint">Facultatif · 30 Mo maximum. Le PDF sera affiché dans une visionneuse intégrée, sans bouton de téléchargement.</small>
+          <label class="inspector-label" for="content-category">Catégorie</label><input class="inspector-input" type="text" name="category" id="content-category" maxlength="120" value="{{ initial_category }}" placeholder="Ex. : Informatique">
+          <label class="inspector-label" for="content-tags">Mots-clés</label><input class="inspector-input" type="text" name="tags" id="content-tags" maxlength="500" value="{{ initial_tags }}" placeholder="vpn, outlook, accès">
+          <small class="inspector-hint">Séparez les mots-clés par des virgules.</small>
+        </section>
+        {% endif %}
+
+        <section class="inspector-card" data-inspector-panel="2">
+          <div class="inspector-heading"><div><span class="inspector-icon">↗</span><strong>Référencement</strong></div></div>
+          <div class="inspector-seo-preview"><small>APERÇU DU RÉSULTAT</small><b id="seo-title">{{ initial_title or 'Titre de votre contenu' }}</b><span id="seo-url">{{ '/contenu/' if content_type == 'page' else '/faq/' }}{{ initial_slug or 'mon-contenu' }}</span><p id="seo-summary">{{ initial_summary or 'Le résumé de votre contenu apparaîtra ici.' }}</p></div>
+          <small class="inspector-hint">Le titre, l’adresse et le résumé sont utilisés pour présenter ce contenu dans le portail.</small>
+        </section>
+
+        <section class="inspector-card inspector-history-card" data-inspector-panel="3">
+          <div class="inspector-heading"><div><span class="inspector-icon">◷</span><strong>Historique</strong></div><button type="button" id="refresh-history" class="inspector-link">Actualiser</button></div>
+          <div id="revision-list" class="revision-list"><p class="revision-empty">Les versions précédentes apparaîtront ici après la première sauvegarde.</p></div>
+        </section>
+        <div class="studio-help-card"><b>Un contenu efficace</b><p>Un titre précis, un résumé court et des étapes numérotées facilitent la recherche et la lecture.</p><a href="https://www.w3.org/WAI/tips/writing/" target="_blank" rel="noopener">Conseils de rédaction accessible ↗</a></div>
+      </aside>
+    </div>
+  </form>
+
+  <dialog id="studio-preview-dialog" class="studio-dialog"><div class="studio-dialog-head"><div><span class="eyebrow">APERÇU UTILISATEUR</span><h2>Rendu de votre contenu</h2></div><button type="button" class="studio-dialog-close" data-close-preview aria-label="Fermer">×</button></div><iframe id="studio-preview-frame" title="Aperçu du contenu" sandbox="allow-same-origin"></iframe><div class="studio-dialog-foot"><span>Prévisualisation non publiée · Le portail public ne change qu'après enregistrement.</span><button type="button" class="studio-button studio-button-primary" data-close-preview>Fermer l’aperçu</button></div></dialog>
+</div>

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Mes fiches suivies — {{ settings.brand_name }}{% endblock %}
+{% block content %}
+<section class="content-wrap narrow-wrap"><div class="section-heading"><div><span class="eyebrow">{{ settings.user_area_eyebrow }}</span><h1>{{ settings.my_follows_title }}</h1><p class="muted">{{ settings.my_follows_intro }}</p></div><a class="button button-primary" href="/">{{ settings.my_follows_open_button }}</a></div>
+{% if articles %}<div class="followed-list">{% for article in articles %}<a href="/faq/{{ article.slug }}"><span class="followed-category">{{ article.category }}</span><b>{{ article.title }}</b><span>Ouvrir la fiche →</span></a>{% endfor %}</div>{% else %}<div class="empty-state"><h3>{{ settings.my_follows_empty_title }}</h3><p>{{ settings.my_follows_empty_text }}</p><a class="button button-light" href="/">{{ settings.my_follows_list_button }}</a></div>{% endif %}</section>
+{% endblock %}

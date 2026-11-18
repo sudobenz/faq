@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="admin-shell">
+  <aside class="admin-sidebar"><div class="admin-sidebar-label">ADMINISTRATION</div><a href="/admin" class="{% if request.url.path == '/admin' %}active{% endif %}"><span>▦</span>Vue d'ensemble</a><a href="/admin/analytics" class="{% if '/analytics' in request.url.path %}active{% endif %}"><span>▥</span>Statistiques</a><a href="/admin/articles" class="{% if '/articles' in request.url.path %}active{% endif %}"><span>▤</span>Articles FAQ</a><a href="/admin/questions" class="{% if '/questions' in request.url.path %}active{% endif %}"><span>◷</span>Questions ouvertes</a><a href="/admin/import" class="{% if '/import' in request.url.path %}active{% endif %}"><span>⇧</span>Import de contenu</a><a href="/admin/portal" class="{% if '/portal' in request.url.path or '/branding' in request.url.path %}active{% endif %}"><span>◈</span>Personnalisation complète</a><a href="/admin/pages" class="{% if '/pages' in request.url.path %}active{% endif %}"><span>▧</span>Bibliothèque de pages</a><a href="/admin/security" class="{% if '/security' in request.url.path %}active{% endif %}"><span>⚿</span>Sécurité</a><div class="sidebar-bottom"><a href="/">← Retour à la FAQ</a></div></aside>
+  <section class="admin-content">{% block admin_content %}{% endblock %}</section>
+</div>
+{% endblock %}
