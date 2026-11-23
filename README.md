@@ -15,7 +15,9 @@ Unless otherwise stated, this license applies to the original project files auth
 
 Application de base de connaissances publique, avec authentification OIDC pour les demandes utilisateur et l'administration. Le projet est volontairement livré comme un **MVP fonctionnel** : il permet de valider l'architecture, les parcours et les premiers écrans avant d'ajouter les fonctions métier plus avancées.
 
+## Demo
 
+![Portail FAQ](demos/Animation_portail_faq.gif)
 
 ## 0.8.3 — Contrôle précis du bandeau et des images de fond
 
